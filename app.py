@@ -31,10 +31,6 @@ def create_app():
             print("数据库连接失败:", str(e))
             raise e
 
-    # 注册蓝图
-    from routes.auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-
     @app.route('/')
     def hello():
         return jsonify({'message': 'Welcome to the Flask API', 'status': 'running'})

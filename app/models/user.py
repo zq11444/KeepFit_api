@@ -8,11 +8,14 @@ class User(db.Model):
     uid = db.Column(db.Integer, primary_key=True)
     userName = db.Column(db.String(1000), unique=True, nullable=False)
     passWord = db.Column(db.String(1000), nullable=False)  # 明文存储
-    role = db.Column(db.String(1000), nullable=False)
+    role = db.Column(db.String(1000), nullable=False,default=1)
 
     def check_password(self, password):
         """直接比较明文密码"""
         return self.passWord == password
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
     def to_dict(self):
         return {
