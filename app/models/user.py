@@ -1,22 +1,22 @@
 from app import db  # 从app包导入db
 from app.utils.security import generate_password_hash, check_password_hash
-
+from app import bcrypt
 
 class User(db.Model):
     __tablename__ = 'user_data'
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    uid = db.Column(db.Integer, primary_key=True)
+    userName = db.Column(db.String(1000), unique=True, nullable=False)
+    passWord = db.Column(db.String(1000), nullable=False)  # 明文存储
+    role = db.Column(db.String(1000), nullable=False)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        """直接比较明文密码"""
+        return self.passWord == password
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'username': self.username
+            'uid': self.uid,
+            'userName': self.userName,
+            'role': self.role
         }
