@@ -10,7 +10,6 @@ class User(db.Model):
     passWord = db.Column(db.String(1000), nullable=False)
     role = db.Column(db.String(1000), nullable=False,default=1)
 
-
     def check_password(self, password):
         """验证哈希密码"""
         return check_password_hash(self.passWord, password)
