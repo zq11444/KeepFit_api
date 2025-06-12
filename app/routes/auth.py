@@ -65,14 +65,6 @@ class Login(Resource):
 
         return user.to_dict(), 200
 
-
-# 注册请求数据模型（带确认密码字段）
-register_model = auth_ns.model('Register', {
-    'userName': fields.String(required=True, min_length=1, max_length=50, example="newuser"),
-    'passWord': fields.String(required=True, min_length=1, max_length=100, example="securepassword123"),
-    'confirmPassword': fields.String(required=True, example="securepassword123")  # 确认密码
-})
-
 # 注册请求数据模型（带确认密码字段）
 register_model = auth_ns.model('Register', {
     'userName': fields.String(required=True, min_length=1, max_length=50, example="newuser"),
@@ -91,9 +83,18 @@ class Register(Resource):
         用户注册接口
         - 用户名必须唯一
         - 密码需与确认密码一致
+        - 用户名、密码、确认密码不能为空
         - 密码会自动加密存储
         """
         data = auth_ns.payload
+
+        # 验证用户名是否为空
+        if not data['userName']:
+            return {"message": "用户名不能为空"}, 400
+
+        # 验证密码和确认密码是否为空
+        if not data['passWord'] or not data['confirmPassword']:
+            return {"message": "密码和确认密码不能为空"}, 400
 
         # 验证密码一致性
         if data['passWord'] != data['confirmPassword']:
@@ -119,7 +120,7 @@ class Register(Resource):
             return {
                 "message": "注册成功",
                 "user": {
-                    "uid": new_user.uid,
+                    "uid": new_user.uid,  # 使用 uid 替代 id
                     "userName": new_user.userName
                 }
             }, 201
