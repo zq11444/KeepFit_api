@@ -12,6 +12,38 @@ login_model = auth_ns.model('Login', {
     'passWord': fields.String(required=True, example="123456")
 })
 
+@auth_ns.route('/adminlogin')
+class AdminLogin(Resource):
+    @auth_ns.expect(login_model)
+    @auth_ns.response(200, '管理员登录成功')
+    @auth_ns.response(400, '用户名或密码为空')
+    @auth_ns.response(401, '用户名或密码错误')
+    @auth_ns.response(403, '无管理员权限')
+    def post(self):
+        """管理员登录(仅限role=0的用户)"""
+        data = auth_ns.payload
+
+        # 输入验证
+        if 'userName' not in data or not data['userName']:
+            return {"message": "用户名为空"}, 400
+        if 'passWord' not in data or not data['passWord']:
+            return {"message": "密码为空"}, 400
+
+        # 查询用户
+        user = User.query.filter_by(userName=data['userName']).first()
+
+        # 验证用户是否存在和密码是否正确
+        if not user or not check_password_hash(user.passWord, data['passWord']):
+            return {"message": "用户名或密码错误"}, 401
+
+        # 验证是否为管理员(role=0)
+        if user.role != "0":
+            return {"message": "无管理员权限"}, 403
+
+        return {
+            "message": "管理员登录成功",
+            "user": user.to_dict()
+        }, 200
 
 @auth_ns.route('/login')
 class Login(Resource):

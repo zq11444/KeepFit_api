@@ -7,8 +7,9 @@ class User(db.Model):
 
     uid = db.Column(db.Integer, primary_key=True)
     userName = db.Column(db.String(1000), unique=True, nullable=False)
-    passWord = db.Column(db.String(1000), nullable=False)  # 明文存储
+    passWord = db.Column(db.String(1000), nullable=False)
     role = db.Column(db.String(1000), nullable=False,default=1)
+
 
     def check_password(self, password):
         """验证哈希密码"""
