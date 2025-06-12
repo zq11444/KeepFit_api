@@ -20,9 +20,11 @@ class Login(Resource):
         """哈希密码登录"""
         data = auth_ns.payload
 
-        # 简单参数检查
-        if 'userName' not in data or 'passWord' not in data:
-            return {"message": "需要用户名和密码"}, 400
+        # 更详细的空值检查
+        if 'userName' not in data or not data['userName']:
+            return {"message": "用户名为空"}, 400
+        if 'passWord' not in data or not data['passWord']:
+            return {"message": "密码为空"}, 400
 
         user = User.query.filter_by(userName=data['userName']).first()
 
