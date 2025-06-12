@@ -2,7 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from flask_restx import Api  # 新增导入
+from flask_restx import Api
+from flask_cors import CORS
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -11,6 +12,7 @@ api = Api()  # 初始化 Flask-RESTX 的 Api 对象
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object('config.Config')
 
     # 初始化扩展
@@ -19,7 +21,7 @@ def create_app():
     bcrypt.init_app(app)
     api.init_app(app)  # 将 Api 绑定到 Flask 应用
 
-    # 注册 Namespace（不是 Blueprint！）
+    # 注册 Namespace
     from app.routes.auth import auth_ns
     api.add_namespace(auth_ns, path='/api/auth')  # 正确方式
 

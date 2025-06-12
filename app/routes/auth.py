@@ -2,6 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from app.models.user import User
 from app import db
 from app.utils.security import generate_password_hash
+from app.utils.security import check_password_hash
 
 auth_ns = Namespace('auth', description='用户认证相关操作')
 
@@ -16,16 +17,18 @@ login_model = auth_ns.model('Login', {
 class Login(Resource):
     @auth_ns.expect(login_model)
     def post(self):
-        """明文密码登录"""
+        """哈希密码登录"""
         data = auth_ns.payload
 
-        # 简单参数检查
-        if 'userName' not in data or 'passWord' not in data:
-            return {"message": "需要用户名和密码"}, 400
+        # 更详细的空值检查
+        if 'userName' not in data or not data['userName']:
+            return {"message": "用户名为空"}, 400
+        if 'passWord' not in data or not data['passWord']:
+            return {"message": "密码为空"}, 400
 
         user = User.query.filter_by(userName=data['userName']).first()
 
-        if not user or not user.check_password(data['passWord']):
+        if not user or not check_password_hash(user.passWord, data['passWord']):
             return {"message": "用户名或密码错误"}, 401
 
         return user.to_dict(), 200

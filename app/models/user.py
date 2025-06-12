@@ -11,8 +11,8 @@ class User(db.Model):
     role = db.Column(db.String(1000), nullable=False,default=1)
 
     def check_password(self, password):
-        """直接比较明文密码"""
-        return self.passWord == password
+        """验证哈希密码"""
+        return check_password_hash(self.passWord, password)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
