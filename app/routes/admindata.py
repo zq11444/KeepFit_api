@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.models.user import User
 from app.models.CoachVideo import CoachVideo
+from app.models.Coach import Coach
 from app import db
 from flask import jsonify
 
@@ -15,11 +16,11 @@ class UserCounts(Resource):
     def get(self):
         """获取用户、教练和课程数量统计"""
         try:
-            # 计算普通用户总数（role为'1'的）
-            total_users = User.query.filter_by(role='1').count()
+            # 计算用户总数
+            total_users = User.query.count()
 
             # 计算教练总数（从Coach表统计）
-            # total_coaches = Coach.query.count()
+            total_coaches = Coach.query.count()
             #
             # 计算教练课程总数
             total_coach_video = CoachVideo.query.count()
@@ -29,7 +30,7 @@ class UserCounts(Resource):
                 'message': 'Success',
                 'data': {
                     'total_users': total_users,
-                    # 'total_coaches': total_coaches,
+                    'total_coaches': total_coaches,
                     'total_coach_courses': total_coach_video
                 }
             }
