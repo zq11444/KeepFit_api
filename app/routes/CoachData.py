@@ -18,3 +18,23 @@ class CoachList(Resource):
         coaches_list = [coach.to_dict() for coach in coaches]
         # 返回 JSON 响应
         return coaches_list
+
+@coaches_ns.route('/<int:cid>/increase_publicity')
+@coaches_ns.param('cid', '教练ID')
+class IncreasePublicity(Resource):
+    def patch(self, cid):
+        """增加指定教练的publicity值"""
+        coach = Coach.query.get_or_404(cid)
+        coach.publicity += 1
+        db.session.commit()
+        return {'message': 'Publicity increased successfully', 'new_publicity': coach.publicity}
+
+@coaches_ns.route('/<int:cid>/decrease_publicity')
+@coaches_ns.param('cid', '教练ID')
+class DecreasePublicity(Resource):
+    def patch(self, cid):
+        """减少指定教练的publicity值"""
+        coach = Coach.query.get_or_404(cid)
+        coach.publicity -= 1
+        db.session.commit()
+        return {'message': 'Publicity decreased successfully', 'new_publicity': coach.publicity}
