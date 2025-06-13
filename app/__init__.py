@@ -35,5 +35,5 @@ def create_app():
     api.add_namespace(Videos_ns,path='/api/videos')
     api.add_namespace(coaches_ns, path='/api/coaches')
     api.add_namespace(reserve_ns, path='/api/reserve')
-
+    
     return app
