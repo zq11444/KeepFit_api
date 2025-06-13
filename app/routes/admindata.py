@@ -187,14 +187,42 @@ class CoachResource(Resource):
             manager_ns.abort(500, f"更新教练失败: {str(e)}")
 
 
-coachvideo_create_model=manager_ns.model('coachvideo',{
-    'videoid':fields.Integer(description=' 教练课程视频ID'),
-    'coach_id':fields.Integer(description='教练ID'),
-    'title':fields.String(description='视频标题'),
-    'type':fields.String(description='视频标签'),
-    'hard':fields.String(description='视频难度')
+
+# 更新模型定义，添加枚举值
+coachvideo_create_model = manager_ns.model('CoachVideoCreate', {
+    'coach_id': fields.Integer(required=True, description='教练ID'),
+    'title': fields.String(required=True, description='视频标题'),
+    'pictureUrl': fields.String(required=True, description='封面图片URL'),
+    'type': fields.String(
+        description='视频类型，可选: 有氧操, 跳绳, 八段锦, HIIT, 舞蹈燃脂, 帕梅拉, 腰腹减脂塑形, 瑜伽, 跑步, 增肌, 冥想, 瘦腿',
+        default='有氧操'
+    ),
+    'hard': fields.String(
+        description='视频难度，可选: K1零基础, K2初学, K3进阶, K4强化, K5挑战',
+        default='K1零基础'
+    )
+})
+coachvideo_update_model = manager_ns.model('CoachVideoPut',{
+    'coach_id': fields.Integer(required=True, description='教练ID'),
+    'title': fields.String(required=True, description='视频标题'),
+    'pictureUrl': fields.String(required=True, description='封面图片URL'),
+    'type': fields.String(
+        description='视频类型，可选: 有氧操, 跳绳, 八段锦, HIIT, 舞蹈燃脂, 帕梅拉, 腰腹减脂塑形, 瑜伽, 跑步, 增肌, 冥想, 瘦腿',
+        default='有氧操'
+    ),
+    'hard': fields.String(
+        description='视频难度，可选: K1零基础, K2初学, K3进阶, K4强化, K5挑战',
+        default='K1零基础'
+    )
 })
 
+# 更新请求解析器
+video_parser = reqparse.RequestParser()
+video_parser.add_argument('coach_id', type=int, required=True, help='教练ID')
+video_parser.add_argument('title', type=str, required=True, help='视频标题')
+video_parser.add_argument('pictureUrl', type=str, required=True, help='封面图片URL')
+video_parser.add_argument('type', type=str, help='视频类型，可选: 有氧操, 跳绳, 八段锦, HIIT, 舞蹈燃脂, 帕梅拉, 腰腹减脂塑形, 瑜伽, 跑步, 增肌, 冥想, 瘦腿')
+video_parser.add_argument('hard', type=str, help='视频难度，可选: K1零基础, K2初学, K3进阶, K4强化, K5挑战')
 
 @manager_ns.route('/coachvideo')
 class CoachVideoList(Resource):
@@ -202,17 +230,80 @@ class CoachVideoList(Resource):
     @manager_ns.marshal_with(coachvideo_create_model, code=200)
     def post(self):
         """创建新的教练视频"""
-        args = video_parser.parse_args()
+        args = video_parser.parse_args()  # 使用之前定义的parser
 
-        new_video = CoachVideo(
-            coach_id=args['coach_id'],
-            title=args['title'],
-            type=args.get('type', 'general'),
-            hard=args.get('hard', 'medium'),
-            seeCount='0'
-        )
+        # 验证难度级别
+        valid_hard_levels = ['K1零基础', 'K2初学', 'K3进阶', 'K4强化', 'K5挑战']
+        if 'hard' in args and args['hard'] not in valid_hard_levels:
+            manager_ns.abort(400, f"难度级别必须是以下之一: {', '.join(valid_hard_levels)}")
 
-        db.session.add(new_video)
-        db.session.commit()
+        # 验证视频类型
+        valid_types = [
+            '有氧操', '跳绳', '八段锦', 'HIIT', '舞蹈燃脂',
+            '帕梅拉', '腰腹减脂塑形', '瑜伽', '跑步', '增肌', '冥想', '瘦腿'
+        ]
+        if 'type' in args:
+            # 处理多种类型的情况（用逗号分隔）
+            input_types = [t.strip() for t in args['type'].split(',') if t.strip()]
+            invalid_types = [t for t in input_types if t not in valid_types]
 
-        return new_video, 200
+            if invalid_types:
+                manager_ns.abort(400,
+                                 f"无效的视频类型: {', '.join(invalid_types)}. 有效类型为: {', '.join(valid_types)}")
+
+            # 保存类型为逗号分隔的字符串
+            args['type'] = ', '.join(input_types)
+
+        # 设置默认值
+        hard = args.get('hard', 'K1零基础')
+        see_count = '0'
+        picture_url = args.get('pictureUrl', '')  # 如果没有提供图片URL，设置为空字符串
+
+        try:
+            new_video = CoachVideo(
+                coach_id=args['coach_id'],
+                title=args['title'],
+                type=args.get('type', '有氧操'),  # 默认类型
+                hard=hard,
+                seeCount=see_count,
+                pictureUrl=picture_url
+            )
+
+            db.session.add(new_video)
+            db.session.commit()
+
+            return new_video, 200
+
+        except Exception as e:
+            db.session.rollback()
+            manager_ns.abort(500, f"创建视频失败: {str(e)}")
+
+@manager_ns.route('/coachvideo/<int:videoid>')
+class VideoResource(Resource):
+    def delete(self, videoid):
+            """删除视频"""
+            Video = CoachVideo.query.get_or_404(videoid)
+            try:
+                db.session.delete(Video)
+                db.session.commit()
+                return {"code": 200, "message": "视频删除成功"}, 200
+            except Exception as e:
+                db.session.rollback()
+                manager_ns.abort(500, f"删除视频失败: {str(e)}")
+
+    @manager_ns.expect(coachvideo_update_model)
+    @manager_ns.marshal_with(coachvideo_update_model)
+    def put(self, videoid):
+        """更新视频信息"""
+        Video = CoachVideo.query.get_or_404(videoid)
+        data = manager_ns.payload
+
+        try:
+            for field in data:
+                if hasattr(Video, field):  # 防止更新不存在的字段
+                    setattr(Video, field, data[field])
+            db.session.commit()
+            return Video, 200
+        except Exception as e:
+            db.session.rollback()
+            manager_ns.abort(500, f"更新教练失败: {str(e)}")
