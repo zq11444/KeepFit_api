@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.models.user import User
+from app.models.CoachVideo import CoachVideo
 from app import db
 from flask import jsonify
 
@@ -9,7 +10,7 @@ stats_ns = Namespace('stats', description='统计相关操作')
 
 
 
-@stats_ns.route('/user_counts')
+@stats_ns.route('/total_counts')
 class UserCounts(Resource):
     def get(self):
         """获取用户、教练和课程数量统计"""
@@ -20,8 +21,8 @@ class UserCounts(Resource):
             # 计算教练总数（从Coach表统计）
             # total_coaches = Coach.query.count()
             #
-            # # 计算教练课程总数
-            # total_coach_courses = CoachCourse.query.count()
+            # 计算教练课程总数
+            total_coach_video = CoachVideo.query.count()
 
             return {
                 'code': 200,
@@ -29,7 +30,7 @@ class UserCounts(Resource):
                 'data': {
                     'total_users': total_users,
                     # 'total_coaches': total_coaches,
-                    # 'total_coach_courses': total_coach_courses
+                    'total_coach_courses': total_coach_video
                 }
             }
         except Exception as e:
