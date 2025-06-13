@@ -20,7 +20,6 @@ class AdminLogin(Resource):
     @auth_ns.response(401, '用户名或密码错误')
     @auth_ns.response(403, '无管理员权限')
     def post(self):
-        """管理员登录(仅限role=0的用户)"""
         data = auth_ns.payload
 
         # 输入验证
