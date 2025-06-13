@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 from flask_restx import Api
 from flask_cors import CORS
 
+
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
@@ -23,6 +24,8 @@ def create_app():
 
     # 注册 Namespace
     from app.routes.auth import auth_ns
+    from app.routes.CoachVideoClass import Videos_ns
     api.add_namespace(auth_ns, path='/api/auth')  # 正确方式
+    api.add_namespace(Videos_ns,path='/api/videos')
 
     return app
