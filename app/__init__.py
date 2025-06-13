@@ -24,7 +24,6 @@ def create_app():
 
     # 注册 Namespace
     from app.routes.auth import auth_ns
-
     from app.routes.admindata import stats_ns
     from app.routes.admindata import manager_ns
     from app.routes.CoachVideoClass import Videos_ns
@@ -32,7 +31,5 @@ def create_app():
     api.add_namespace(stats_ns, path='/api/status')
     api.add_namespace(manager_ns,path='/api/manager')
     api.add_namespace(Videos_ns,path='/api/videos')
-    
-
 
     return app
