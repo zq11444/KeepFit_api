@@ -74,7 +74,7 @@ register_model = auth_ns.model('Register', {
 @auth_ns.route('/register')
 class Register(Resource):
     @auth_ns.expect(register_model)
-    @auth_ns.response(201, '用户注册成功')
+    @auth_ns.response(200, '用户注册成功')
     @auth_ns.response(400, '参数无效')
     @auth_ns.response(409, '用户名已存在')
     def post(self):
@@ -122,7 +122,7 @@ class Register(Resource):
                     "uid": new_user.uid,  # 使用 uid 替代 id
                     "userName": new_user.userName
                 }
-            }, 201
+            }, 200
 
         except Exception as e:
             db.session.rollback()

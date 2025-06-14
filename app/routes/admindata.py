@@ -127,7 +127,7 @@ coach_create_model = manager_ns.model('CoachCreate', {
 class CoachCreateResource(Resource):
     @manager_ns.expect(coach_create_model)
     @manager_ns.marshal_with(coach_model)
-    @manager_ns.response(201, '教练创建成功')
+    @manager_ns.response(200, '教练创建成功')
     @manager_ns.response(400, '参数校验失败')
     def post(self):
         """新增教练（星级为字符串格式）"""

@@ -9,7 +9,11 @@ from flask_cors import CORS
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
-api = Api()  # 初始化 Flask-RESTX 的 Api 对象
+api = Api(
+    title='KeepFit API',  # 文档标题
+    version='1.0',                    # API版本
+    description='KeepFit 后端接口文档',  # 详细描述
+)
 
 def create_app():
     app = Flask(__name__)
