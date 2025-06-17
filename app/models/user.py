@@ -9,6 +9,7 @@ class User(db.Model):
     userName = db.Column(db.String(1000), unique=True, nullable=False)
     passWord = db.Column(db.String(1000), nullable=False)
     role = db.Column(db.String(1000), nullable=False,default=1)
+    isVip = db.Column(db.String(1000), nullable=False, default=1)
 
     def check_password(self, password):
         """验证哈希密码"""
@@ -21,5 +22,6 @@ class User(db.Model):
         return {
             'uid': self.uid,
             'userName': self.userName,
-            'role': self.role
+            'role': self.role,
+            'isVip':self.isVip
         }
